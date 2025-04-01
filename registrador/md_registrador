@@ -1,0 +1,26 @@
+module registrador (
+    input clk,
+    input reset,
+    input [4:0] rs, rt, rd,  // Endereços dos registradores
+    input [31:0] write_data,  // Dados a serem escritos
+    input write_enable,       // Sinal de escrita
+    output reg [31:0] read_data1, read_data2  // Dados lidos
+);
+    reg [31:0] registers [31:0];  // 32 registradores de 32 bits
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            // Resetar os registradores
+            registers[0] <= 32'b0;
+            // Inicializar os outros registradores se necessário
+        end else if (write_enable) begin
+            registers[rd] <= write_data;  // Escrever no registrador
+        end
+    end
+
+    always @(*) begin
+        // Ler os registradores
+        read_data1 = registers[rs];
+        read_data2 = registers[rt];
+    end
+endmodule
