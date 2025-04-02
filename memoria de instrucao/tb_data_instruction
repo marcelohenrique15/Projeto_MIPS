@@ -1,0 +1,26 @@
+module instruction_memory_tb;
+    // entrada e saída
+    reg [31:0] address;
+    wire [31:0] instruction;
+    
+    // instanciação o módulo
+    instruction_memory imem (
+        .address(address),
+        .instruction(instruction)
+    );
+    
+    initial begin
+        // dá início ao monitor
+        $monitor("Time=%0t | Address=%h | Instruction=%h", $time, address, instruction);
+        
+        // teste
+        #10 address = 32'h00000000; 
+        #10 address = 32'h00000004; 
+        #10 address = 32'h00000008;
+        #10 address = 32'h0000000C; 
+        #10 address = 32'h00000010; 
+        #10 address = 32'h00000014; // 0
+        
+        #10 $finish;
+    end
+endmodule

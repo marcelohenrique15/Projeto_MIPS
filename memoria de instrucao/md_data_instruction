@@ -1,0 +1,26 @@
+module instruction_memory ( //definindo entradas e saídas
+    input wire [31:0] address, 
+    output reg [31:0] instruction 
+);
+    //array para armazenar as instruções criando a memória
+    reg [31:0] mem [0:63];
+    
+    //carregar as instruções 
+    initial begin
+        mem[0] = 32'h20010005;  // addi $1, $0, 5
+        mem[1] = 32'h2002000A;  // addi $2, $0, 10
+        mem[2] = 32'h00221820;  // add $3, $1, $2
+        mem[3] = 32'hAC030004;  // sw $3, 4($0)
+        mem[4] = 32'h8C040004;  // lw $4, 4($0)
+
+        integer i;
+        for (i = 5; i < 64; i = i + 1) begin
+            mem[i] = 32'h00000000;
+        end
+    end
+    
+    //lê a instrução
+    always @(*) begin
+        instruction = mem[address[31:2]];
+    end
+endmodule
