@@ -1,0 +1,57 @@
+module ALU_tb;
+
+// Definir variáveis para os testes
+reg [31:0] A, B;
+reg [3:0] ALUControl;
+wire [31:0] ALUResult;
+wire Zero;
+
+// Instância do módulo ALU
+ALU uut (
+    .A(A),
+    .B(B),
+    .ALUControl(ALUControl),
+    .ALUResult(ALUResult),
+    .Zero(Zero)
+);
+
+initial begin
+    // Teste de Adição (A + B)
+    A = 32'h00000010; // 16
+    B = 32'h00000020; // 32
+    ALUControl = 4'b0010; // ADD
+    #10;
+
+    // Teste de Subtração (A - B)
+    A = 32'h00000030; // 48
+    B = 32'h00000010; // 16
+    ALUControl = 4'b0110; // SUB
+    #10;
+
+    // Teste de AND
+    A = 32'h000000F0; // 240
+    B = 32'h0000000F; // 15
+    ALUControl = 4'b0000; // AND
+    #10;
+
+    // Teste de OR
+    A = 32'h000000F0; // 240
+    B = 32'h0000000F; // 15
+    ALUControl = 4'b0001; // OR
+    #10;
+
+    // Teste de SLT (A < B)
+    A = 32'h00000010; // 16
+    B = 32'h00000020; // 32
+    ALUControl = 4'b0111; // SLT
+    #10;
+
+    $finish;
+end
+
+initial begin
+    $monitor("A = %h, B = %h, ALUControl = %b, ALUResult = %h, Zero = %b", 
+              A, B, ALUControl, ALUResult, Zero);
+end
+
+endmodule
