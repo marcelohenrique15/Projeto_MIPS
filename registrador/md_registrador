@@ -1,50 +1,17 @@
 module registrador (
     input clk,
     input reset,
-    input [4:0] rs, rt, rd,  // Endereços dos registradores
-    input [31:0] write_data,  // Dados a serem escritos
-    input write_enable,       // Sinal de escrita
-    output reg [31:0] read_data1, read_data2  // Dados lidos
+    input [4:0] rs, rt, rd,  
+    input [31:0] write_data,  
+    input write_enable,    
+    output reg [31:0] read_data1, read_data2 
 );
-    reg [31:0] registers [31:0];  // 32 registradores de 32 bits
-
-    define registers[0]     $zero
-    define registers[1]     $at
-    define registers[2]     $v0
-    define registers[3]     $v1
-    define registers[4]     $a0
-    define registers[5]     $a1
-    define registers[6]     $a2
-    define registers[7]     $a3
-    define registers[8]     $t0
-    define registers[9]     $t1
-    define registers[10]    $t2
-    define registers[11]    $t3
-    define registers[12]    $t4
-    define registers[13]    $t5
-    define registers[14]    $t6
-    define registers[15]    $t7
-    define registers[16]    $s0
-    define registers[17]    $s1
-    define registers[18]    $s2
-    define registers[19]    $s3
-    define registers[20]    $s4
-    define registers[21]    $s5
-    define registers[22]    $s6
-    define registers[23]    $s7
-    define registers[24]    $t8
-    define registers[25]    $t9
-    define registers[26]    $k0
-    define registers[27]    $k1
-    define registers[28]    $gp
-    define registers[29]    $sp
-    define registers[30]    $fp
-    define registers[31]    $ra
+    reg [31:0] registers [31:0];  
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
-            registers[$zero] <= 32'b0; 
-        end else if (write_enable && rd != $zero) begin
+            registers[0] <= 32'b0;  
+        end else if (write_enable && rd != 0) begin
             registers[rd] <= write_data;
         end
     end
