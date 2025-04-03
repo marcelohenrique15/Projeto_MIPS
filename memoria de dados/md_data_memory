@@ -1,0 +1,92 @@
+// Módulo da Memória de Dados do MIPS
+module DataMemory (
+    input wire clk,                // Clock do sistema
+    input wire [31:0] Address,     // Endereço de memória (32 bits)
+    input wire [31:0] WriteData,   // Dados para escrita (32 bits)
+    input wire MemRead,            // Controle de leitura (1 para ler)
+    input wire MemWrite,           // Controle de escrita (1 para escrever)
+    input wire [1:0] SizeControl,  // Tamanho do acesso: 00=byte, 01=meia-palavra, 10=palavra
+    input wire SignExtend,         // Extensão de sinal (1 para estender sinal)
+    output reg [31:0] ReadData     // Dados lidos (32 bits)
+);
+
+    // Memória organizada como 1KB (1024 bytes)
+    reg [7:0] Memoria [0:1023];   // Cada posição armazena 1 byte
+    
+    // Endereço alinhado para palavras (desconsidera os 2 bits menos significativos)
+    wire [31:0] EnderecoAlinhado;
+    assign EnderecoAlinhado = {Address[31:2], 2'b00};
+    
+    // Operação de Escrita (sincronizada com clock)
+    always @(posedge clk) begin
+        if (MemWrite) begin
+            case (SizeControl)
+                2'b00: Memoria[Address] <= WriteData[7:0]; // Escrita de byte
+                2'b01: begin // Escrita de meia-palavra (16 bits)
+                    if (Address[0] == 0) begin // Verifica alinhamento
+                        Memoria[Address]   <= WriteData[7:0];
+                        Memoria[Address+1] <= WriteData[15:8];
+                    end
+                end
+                2'b10: begin // Escrita de palavra (32 bits)
+                    if (EnderecoAlinhado == Address) begin // Verifica alinhamento
+                        Memoria[Address]   <= WriteData[7:0];
+                        Memoria[Address+1] <= WriteData[15:8];
+                        Memoria[Address+2] <= WriteData[23:16];
+                        Memoria[Address+3] <= WriteData[31:24];
+                    end
+                end
+            endcase
+        end
+    end
+    
+    // Operação de Leitura (assíncrona)
+    always @(*) begin
+        if (MemRead) begin
+            case (SizeControl)
+                2'b00: begin // Leitura de byte
+                    ReadData = SignExtend ? {{24{Memoria[Address][7]}}, Memoria[Address]} : 
+                              {24'b0, Memoria[Address]};
+                end
+                2'b01: begin // Leitura de meia-palavra
+                    if (Address[0] == 0) begin
+                        ReadData = SignExtend ? {{16{Memoria[Address+1][7]}}, Memoria[Address+1], Memoria[Address]} : 
+                                  {16'b0, Memoria[Address+1], Memoria[Address]};
+                    end else begin
+                        ReadData = 32'b0; // Endereço não alinhado
+                    end
+                end
+                2'b10: begin // Leitura de palavra
+                    if (EnderecoAlinhado == Address) begin
+                        ReadData = {Memoria[Address+3], Memoria[Address+2], 
+                                   Memoria[Address+1], Memoria[Address]};
+                    end else begin
+                        ReadData = 32'b0; // Endereço não alinhado
+                    end
+                end
+                default: ReadData = 32'b0;
+            endcase
+        end else begin
+            ReadData = 32'b0;
+        end
+    end
+    
+    // Inicialização da memória para testes
+    initial begin
+        // Inicializa toda memória com zero
+        for (integer i = 0; i < 1024; i = i + 1) begin
+            Memoria[i] = 8'b0;
+        end
+        
+        // Dados de teste pré-carregados
+        Memoria[0] = 8'h12;  // Palavra no endereço 0x00: 0x78563412
+        Memoria[1] = 8'h34;
+        Memoria[2] = 8'h56;
+        Memoria[3] = 8'h78;
+        
+        Memoria[4] = 8'hFF;  // Meia-palavra no endereço 0x04: 0x0000A0FF
+        Memoria[5] = 8'hA0;
+        
+        Memoria[6] = 8'h55;  // Byte no endereço 0x06: 0x55
+    end
+endmodule
