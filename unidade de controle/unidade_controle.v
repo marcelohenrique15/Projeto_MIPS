@@ -1,5 +1,3 @@
-`timescale 1ps/1ps  
-
 module ControlUnit(
     input [5:0] opcode, // Bits[31:26] instrução
     input[5:0] Funct, // Bits [5:0] para R type
@@ -12,6 +10,8 @@ localparam RTYPE = 6'b000000;
 localparam LW = 6'100011;
 localparam SW = 6'b101011;
 localparam BEQ = 6'b000100;
+localparam ADDI = 6'b001000;
+localparam J = 6'b000010;
 
 always @(opcode or Funct) begin
     // Valores padrão e definições (def)
@@ -67,6 +67,28 @@ always @(opcode or Funct) begin
             RegDst = 0;
             RegWrite = 0;
             Jump = 0;
+        end
+
+        ADDI: begin
+            ALUOp = 2'b00; 
+            MemtoReg = 0;
+            MemWrite = 0;
+            Branch = 0;
+            ALUSrc = 1;
+            RegDst = 0;
+            RegWrite = 1;
+            Jump = 0;
+        end
+
+        J: begin
+            ALUOp = 2'b00; 
+            MemtoReg = 0;
+            MemWrite = 0;
+            Branch = 0;
+            ALUSrc = 0;
+            RegDst = 0;
+            RegWrite = 0;
+            Jump = 1;
         end
     endcase
 end

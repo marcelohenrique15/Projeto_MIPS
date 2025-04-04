@@ -1,5 +1,3 @@
-`timescale 1ps/1ps
-
 module ControlUnit_tb;
 
     // Declaração das entradas e saídas
@@ -26,8 +24,8 @@ module ControlUnit_tb;
     initial begin
         // Inicialização
         $display("Iniciando simulação...");
-        $monitor("Time=%0t | opcode=%b | ALUOp=%b | MemtoReg=%b | MemWrite=%b | Branch=%b | ALUSrc=%b | RegDst=%b | RegWrite=%b | Jump=%b",
-                 $time, opcode, ALUOp, MemtoReg, MemWrite, Branch, ALUSrc, RegDst, RegWrite, Jump);
+        $monitor("opcode=%b | ALUOp=%b | MemtoReg=%b | MemWrite=%b | Branch=%b | ALUSrc=%b | RegDst=%b | RegWrite=%b | Jump=%b",
+                 opcode, ALUOp, MemtoReg, MemWrite, Branch, ALUSrc, RegDst, RegWrite, Jump);
 
         // Teste 1: R-type (opcode = 000000)
         opcode = 6'b000000;
@@ -46,7 +44,15 @@ module ControlUnit_tb;
         opcode = 6'b000100;
         #10;
 
-        // Teste 5: Opcode inválido (padrão)
+        // Teste 5: ADDI (opcode = 001000)
+        opcode = 6'b001000;
+        #10;
+
+        // Teste 6: J (opcode = 000010)
+        opcode = 6'b000010;
+        #10
+
+        // Teste 7: Opcode inválido (padrão)
         opcode = 6'b111111;
         #10;
 
