@@ -7,7 +7,7 @@ module ControlUnit(
 
 // Codificação dos opcodes
 localparam RTYPE = 6'b000000;
-localparam LW = 6'100011;
+localparam LW = 6'b100011;
 localparam SW = 6'b101011;
 localparam BEQ = 6'b000100;
 localparam ADDI = 6'b001000;

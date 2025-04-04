@@ -50,7 +50,7 @@ module ControlUnit_tb;
 
         // Teste 6: J (opcode = 000010)
         opcode = 6'b000010;
-        #10
+        #10;
 
         // Teste 7: Opcode inválido (padrão)
         opcode = 6'b111111;
