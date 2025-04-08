@@ -1,6 +1,6 @@
 module instruction_memory ( //definindo entradas e saídas
-    input wire [31:0] address, 
-    output reg [31:0] instruction 
+    input wire [31:0] Address, 
+    output reg [31:0] Instruction 
 );
     //array para armazenar as instruções criando a memória
     reg [31:0] mem [0:63];
