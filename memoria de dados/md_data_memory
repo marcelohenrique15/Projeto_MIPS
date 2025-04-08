@@ -9,11 +9,11 @@ output reg [31:0] ReadData      // saida
 reg [31:0] Memory [1023:0];  // define a memoria (4KB)
 
 always @(posedge clk) begin
-  if (memwrite) begin
-    Memory[Address >> 2] <= write_data;
+  if (MemWrite) begin
+    Memory[Address >> 2] <= WriteData;
   end
 end
 
-assign read_data = Memory[Address >> 2]
+  assign ReadData = Memory[Address >> 2];
 
 endmodule
