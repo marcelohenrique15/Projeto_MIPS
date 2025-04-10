@@ -1,25 +1,22 @@
-module registrador (
-    input clk,
-    input reset,
-    input [4:0] rs, rt, rd,  
-    input [31:0] write_data,  
-    input write_enable,    
-    output reg [31:0] read_data1, read_data2 
+module register_file (
+    input  wire        clk,       // Clock do sistema
+    input  wire        WE3,       // Write Enable (ativa escrita)
+    input  wire [4:0]  A1, A2, A3, // Endereços dos registradores
+    input  wire [31:0] WD3,       // Dados a serem escritos
+    output wire [31:0] RD1, RD2   // Dados lidos
 );
-    reg [31:0] registers [31:0];  
 
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            registers[0] <= 32'b0;  
-        end else if (write_enable && rd != 0) begin
-            registers[rd] <= write_data;
-        end
+    // Banco de registradores (32 registradores de 32 bits)
+    reg [31:0] regfile [31:0];
+
+    // Leitura assíncrona
+    assign RD1 = (A1 != 0) ? regfile[A1] : 0;  // Se A1 == 0, retorna 0 (registrador zero)
+    assign RD2 = (A2 != 0) ? regfile[A2] : 0;
+
+    // Escrita síncrona
+    always @(posedge clk) begin
+        if (WE3 && (A3 != 0))  // Registrador zero é constante 0
+            regfile[A3] <= WD3;
     end
 
-    always @(*) begin
-        // Ler os registradores
-        read_data1 = registers[rs];
-        read_data2 = registers[rt];
-    end
 endmodule
-gfgfhfhfh

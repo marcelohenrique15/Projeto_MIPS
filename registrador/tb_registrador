@@ -1,87 +1,72 @@
-module tb_registrador;
+`timescale 1ns / 1ps
 
-    // Declaração dos sinais de teste
-    reg clk;                    // Sinal de clock
-    reg reset;                  // Sinal de reset
-    reg [4:0] rs, rt, rd;       // Endereços dos registradores
-    reg [31:0] write_data;      // Dados a serem escritos no registrador
-    reg write_enable;           // Sinal de controle para escrever no registrador
-    wire [31:0] read_data1, read_data2; // Dados lidos dos registradores rs e rt
+module register_file_tb;
 
-    // Instancia o módulo de registradores
-    registrador uut (
+    // Sinais de teste
+    reg clk;
+    reg WE3;
+    reg [4:0] A1, A2, A3;
+    reg [31:0] WD3;
+    wire [31:0] RD1, RD2;
+
+    // Instancia o módulo register_file
+    register_file uut (
         .clk(clk),
-        .reset(reset),
-        .rs(rs),
-        .rt(rt),
-        .rd(rd),
-        .write_data(write_data),
-        .write_enable(write_enable),
-        .read_data1(read_data1),
-        .read_data2(read_data2)
+        .WE3(WE3),
+        .A1(A1),
+        .A2(A2),
+        .A3(A3),
+        .WD3(WD3),
+        .RD1(RD1),
+        .RD2(RD2)
     );
 
-    // Geração de clock (ciclo de 10 unidades de tempo)
-    always begin
-        #5 clk = ~clk;
-    end
+    // Gera o clock
+    always #5 clk = ~clk; // Clock de 10ns (5ns high, 5ns low)
 
-    // Processo de simulação
     initial begin
-        // Inicialização dos sinais
+        // Inicializa os sinais
         clk = 0;
-        reset = 0;
-        write_enable = 0;
-        rs = 5'b00000;   // Registrador 0
-        rt = 5'b00001;   // Registrador 1
-        rd = 5'b00010;   // Registrador 2
-        write_data = 32'hDEADBEEF; // Dados a serem escritos no registrador 2
+        WE3 = 0;
+        A1 = 0;
+        A2 = 0;
+        A3 = 0;
+        WD3 = 0;
 
-        // Teste 1: Reset do sistema
-        $display("Teste 1: Reset");
-        reset = 1; // Ativa o reset
-        #10;       // Aguarda 10 unidades de tempo
-        reset = 0; // Desativa o reset
+        // Teste 1: Escreve no registrador 5
         #10;
-        
-        // Teste 2: Escrever no registrador 2
-        $display("Teste 2: Escrever no registrador 2");
-        write_enable = 1; // Permite a escrita
-        rd = 5'b00010;    // Escolhe o registrador 2
-        write_data = 32'h12345678; // Dados a serem escritos
-        #10; // Aguarda a escrita
-        write_enable = 0; // Desativa a escrita
-
-        // Teste 3: Ler os dados do registrador 2
-        $display("Teste 3: Ler os dados do registrador 2");
-        rs = 5'b00010; // Leitura do registrador 2
-        rt = 5'b00001; // Leitura do registrador 1 (não foi escrito ainda)
+        WE3 = 1; A3 = 5; WD3 = 32'hA5A5A5A5; // Escreve A5A5A5A5 no registrador 5
         #10;
+        WE3 = 0; // Desativa escrita
 
-        // Exibe os resultados
-        $display("Valor de read_data1 (registrador 2): %h", read_data1);
-        $display("Valor de read_data2 (registrador 1): %h", read_data2);
-
-        // Teste 4: Escrever novamente no registrador 1
-        $display("Teste 4: Escrever no registrador 1");
-        write_enable = 1; // Permite a escrita
-        rd = 5'b00001;    // Escolhe o registrador 1
-        write_data = 32'h87654321; // Dados a serem escritos
-        #10; // Aguarda a escrita
-        write_enable = 0; // Desativa a escrita
-        
-        // Teste 5: Ler os dados do registrador 1
-        $display("Teste 5: Ler os dados do registrador 1");
-        rs = 5'b00001; // Leitura do registrador 1
-        rt = 5'b00010; // Leitura do registrador 2
+        // Teste 2: Lê do registrador 5
+        A1 = 5;
         #10;
+        $display("RD1 = %h (Esperado: A5A5A5A5)", RD1);
 
-        // Exibe os resultados
-        $display("Valor de read_data1 (registrador 1): %h", read_data1);
-        $display("Valor de read_data2 (registrador 2): %h", read_data2);
+        // Teste 3: Escreve no registrador 10
+        WE3 = 1; A3 = 10; WD3 = 32'h5A5A5A5A;
+        #10;
+        WE3 = 0;
 
-        // Finaliza a simulação
-        $finish;
+        // Teste 4: Lê dos registradores 5 e 10
+        A1 = 5;
+        A2 = 10;
+        #10;
+        $display("RD1 = %h (Esperado: A5A5A5A5)", RD1);
+        $display("RD2 = %h (Esperado: 5A5A5A5A)", RD2);
+
+        // Teste 5: Escreve no registrador 0 (deve permanecer 0)
+        WE3 = 1; A3 = 0; WD3 = 32'hFFFFFFFF;
+        #10;
+        WE3 = 0;
+
+        // Teste 6: Lê do registrador 0
+        A1 = 0;
+        #10;
+        $display("RD1 = %h (Esperado: 00000000)", RD1);
+
+        $stop;
     end
 
 endmodule
