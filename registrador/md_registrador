@@ -22,3 +22,4 @@ module registrador (
         read_data2 = registers[rt];
     end
 endmodule
+gfgfhfhfh
