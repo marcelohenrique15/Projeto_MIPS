@@ -1,19 +1,19 @@
 module data_memory (
-input wire [31:0] Address,        // endereço de memoria
-input wire [31:0] WriteData,    // write data
-input wire MemWrite,             // memwrite
-input wire clk,                  // clock
-output reg [31:0] ReadData      // saida
+    input wire [31:0] Address,
+    input wire [31:0] WriteData,
+    input wire MemWrite,
+    input wire clk,
+    output reg [31:0] ReadData
 );
+    reg [31:0] Memory [0:1023];
 
-reg [31:0] Memory [1023:0];  // define a memoria (4KB)
+    always @(posedge clk) begin
+        if (MemWrite) begin
+            Memory[Address >> 2] <= WriteData;
+        end
+    end
 
-always @(posedge clk) begin
-  if (MemWrite) begin
-    Memory[Address >> 2] <= WriteData;
-  end
-end
-
-  assign ReadData = Memory[Address >> 2];
-
+    always @(*) begin
+        ReadData = Memory[Address >> 2];
+    end
 endmodule

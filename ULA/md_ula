@@ -1,30 +1,43 @@
 module ALU (
-    input [31:0] A,           // Operando A (32 bits)
-    input [31:0] B,           // Operando B (32 bits)
-    input [3:0] ALUControl,   // Controle da operação da ALU (4 bits)
-    output reg [31:0] ALUResult, // Resultado da operação (32 bits)
-    output reg Zero            // Sinal de Zero (1 bit)
+    input [31:0] A,
+    input [31:0] B,
+    input [3:0] ALUControl,
+    output reg [31:0] ALUResult,
+    output reg Zero
 );
+    always @(*) begin
+        case (ALUControl)
+            4'b0010: ALUResult = A + B;
+            4'b0110: ALUResult = A - B;
+            4'b0000: ALUResult = A & B;
+            4'b0001: ALUResult = A | B;
+            4'b0111: ALUResult = (A < B) ? 1 : 0;
+            default: ALUResult = 0;
+        endcase
+        Zero = (ALUResult == 0);
+    end
+endmodule
 
-// Definindo os códigos de operação
-localparam ADD  = 4'b0010;  // Operação de adição
-localparam SUB  = 4'b0110;  // Operação de subtração
-localparam AND  = 4'b0000;  // Operação AND
-localparam OR   = 4'b0001;  // Operação OR
-localparam SLT  = 4'b0111;  // Operação Set Less Than
-
-always @(*) begin
-    case(ALUControl)
-        ADD: ALUResult = A + B;          // Adição
-        SUB: ALUResult = A - B;          // Subtração
-        AND: ALUResult = A & B;          // AND
-        OR:  ALUResult = A | B;          // OR
-        SLT: ALUResult = (A < B) ? 32'b1 : 32'b0;  // SLT (Set Less Than)
-        default: ALUResult = 32'b0;      // Valor padrão (caso a operação não seja reconhecida)
-    endcase
-
-    // Sinal de Zero: será 1 se o resultado for zero, caso contrário será 0
-    Zero = (ALUResult == 32'b0) ? 1 : 0;
-end
-
+module ALUControlUnit(
+    input wire [1:0] ALUOp,
+    input wire [5:0] Funct,
+    output reg [3:0] ALUControl
+);
+    always @(*) begin
+        case (ALUOp)
+            2'b00: ALUControl = 4'b0010;
+            2'b01: ALUControl = 4'b0110;
+            2'b10: begin
+                case (Funct)
+                    6'b100000: ALUControl = 4'b0010;
+                    6'b100010: ALUControl = 4'b0110;
+                    6'b100100: ALUControl = 4'b0000;
+                    6'b100101: ALUControl = 4'b0001;
+                    6'b101010: ALUControl = 4'b0111;
+                    default:   ALUControl = 4'b1111;
+                endcase
+            end
+            default: ALUControl = 4'b1111;
+        endcase
+    end
 endmodule

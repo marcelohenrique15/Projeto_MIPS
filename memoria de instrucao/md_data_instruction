@@ -1,28 +1,27 @@
-module instruction_memory ( //definindo entradas e saídas
-    input wire [31:0] Address, 
-    output reg [31:0] Instruction 
+module Instruction_memory (
+    input [31:0] addr,
+    output reg [31:0] instr
 );
-    //array para armazenar as instruções criando a memória
-    reg [31:0] mem [0:63];
-    
-    // Declaração da variável integer no escopo do módulo
-    integer i;
-    
-    //carregar as instruções 
-    initial begin
-        mem[0] = 32'h20010005;  // addi $1, $0, 5
-        mem[1] = 32'h2002000A;  // addi $2, $0, 10
-        mem[2] = 32'h00221820;  // add $3, $1, $2
-        mem[3] = 32'hAC030004;  // sw $3, 4($0)
-        mem[4] = 32'h8C040004;  // lw $4, 4($0)
+    reg [31:0] rom[0:31]; // Aumente o tamanho se necessário, mas para este caso, 0 a 5 é suficiente
 
-        for (i = 5; i < 64; i = i + 1) begin
-            mem[i] = 32'h00000000;
+    initial begin
+        // Inicializa as mesmas instruções
+        rom[0] = 32'b001000_00000_01000_0000000000000101; // addi $t0, $zero, 5
+        rom[1] = 32'b001000_00000_01001_0000000000001010; // addi $t1, $zero, 10
+        rom[2] = 32'b000000_01000_01001_01010_00000_100000; // add $t2, $t0, $t1
+        rom[3] = 32'b101011_00000_01010_0000000000000000; // sw $t2, 0($zero)
+        rom[4] = 32'b100011_00000_01011_0000000000000000; // lw $t3, 0($zero)
+        rom[5] = 32'b000000_00000_00000_00000_00000_000000; // nop
+        // Preenche o restante com nop para evitar "x"
+        for (integer i = 6; i < 32; i = i + 1) begin
+            rom[i] = 32'b000000_00000_00000_00000_00000_000000; // nop
         end
     end
-    
-    //lê a instrução
+
     always @(*) begin
-        instruction = mem[address[31:2]];
+        if (addr[6:2] < 32) // Limita a 32 palavras (0 a 31)
+            instr = rom[addr[6:2]];
+        else
+            instr = 32'b000000_00000_00000_00000_00000_000000; // Retorna nop se fora dos limites
     end
 endmodule

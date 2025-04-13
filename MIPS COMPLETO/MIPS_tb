@@ -1,0 +1,38 @@
+module tb_MIPS_CPU;
+    reg clk;
+    reg reset;
+    wire [31:0] regs_out [31:0];
+
+    MIPS_CPU uut (
+        .clk(clk),
+        .reset(reset),
+        .regs_out(regs_out)
+    );
+
+    // Clock de 10ns
+    always #5 clk = ~clk;
+
+    initial begin
+        $display("Iniciando simulação...");
+        clk = 0;
+        reset = 1;
+        #10;
+        reset = 0;
+
+        #100;  // Tempo suficiente para 5 instruções (50ns) + margem
+
+        $display("==== Resultado Final dos Registradores ====");
+        $display("$t0 ($8) = %d", regs_out[8]);   // Deve ser 5
+        $display("$t1 ($9) = %d", regs_out[9]);   // Deve ser 10
+        $display("$t2 ($10) = %d", regs_out[10]); // Deve ser 15
+        $display("$t3 ($11) = %d", regs_out[11]); // Deve ser 15
+
+        $finish;
+    end
+
+    always @(posedge clk) begin
+        #1;
+        $display("Tempo: %t, PC: %d, Instr: %h, $t0: %d, $t1: %d, $t2: %d", 
+                 $time, uut.PC, uut.Instruction, regs_out[8], regs_out[9], regs_out[10]);
+    end
+endmodule
