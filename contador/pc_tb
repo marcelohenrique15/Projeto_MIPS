@@ -1,0 +1,62 @@
+`timescale 1ns / 1ps
+
+module tb_ProgramCounter();
+
+    // Entradas
+    reg clk;
+    reg reset;
+    reg [31:0] nextPC;
+
+    // Saída
+    wire [31:0] PC;
+
+    // Instancia o módulo sob teste
+    ProgramCounter uut (
+        .clk(clk),
+        .reset(reset),
+        .nextPC(nextPC),
+        .PC(PC)
+    );
+
+    // Gera o clock: alterna a cada 5ns (período de 10ns)
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    // Sequência de teste
+    initial begin
+        $display("\n--- Teste do Program Counter ---");
+
+        // Inicialização
+        reset = 1;
+        nextPC = 32'h12345678;
+        #10;
+
+        $display("Reset ativo -> PC = %h (esperado: 00000000)", PC);
+
+        // Libera o reset
+        reset = 0;
+        nextPC = 32'h00000004;
+        #10;
+        $display("Clock 1 -> nextPC = 0x00000004 -> PC = %h (esperado: 00000004)", PC);
+
+        // Próximo valor
+        nextPC = 32'h00000008;
+        #10;
+        $display("Clock 2 -> nextPC = 0x00000008 -> PC = %h (esperado: 00000008)", PC);
+
+        // Mais um valor
+        nextPC = 32'hDEADBEEF;
+        #10;
+        $display("Clock 3 -> nextPC = 0xDEADBEEF -> PC = %h (esperado: DEADBEEF)", PC);
+
+        // Ativa reset novamente
+        reset = 1;
+        #10;
+        $display("Reset novamente -> PC = %h (esperado: 00000000)", PC);
+
+        $finish;
+    end
+
+endmodule
