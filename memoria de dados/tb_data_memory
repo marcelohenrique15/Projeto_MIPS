@@ -8,7 +8,7 @@ module tb_data_memory();
     reg [31:0] WriteData;
     wire [31:0] ReadData;
 
-    // Instancia o módulo sob teste
+    // Instancia o módulo de memória de dados (Data Memory)
     data_memory uut (
         .clk(clk),
         .MemWrite(MemWrite),
@@ -17,44 +17,48 @@ module tb_data_memory();
         .ReadData(ReadData)
     );
 
-    // Geração do clock
+    // Geração do clock (10ns de período, 5ns de cada borda)
     initial begin
         clk = 0;
-        forever #5 clk = ~clk;
+        forever #5 clk = ~clk;  // Alterna o clock a cada 5ns
     end
 
     initial begin
         
-        // Inicializa sinais
+        // Inicialização dos sinais de controle e dados
         MemWrite = 0;
         Address = 0;
         WriteData = 0;
 
-        // Espera o clock estabilizar
+        // Espera o clock estabilizar (primeiro ciclo de clock)
         #10;
 
-        // Simula resultado de $t2 = $t0 + $t1 = 15
-        WriteData = 32'd15;
-        Address = 32'd0;
-        MemWrite = 1;
-        #10;  // Escreve na borda de subida
+        // Operação 1: Simula a instrução `sw $t2, 0($zero)`
+        // O valor 15 será gravado no endereço 0 da memória.
+        // Escrevendo 15 no endereço 0 (simula sw)
+        WriteData = 32'd15;        // Dados a serem escritos (15 em decimal)
+        Address = 32'd0;           // Endereço de memória onde o dado será armazenado
+        MemWrite = 1;              // Ativa a operação de escrita na memória
+        #10;                       // Aguarda o próximo ciclo de clock para efetuar a escrita
+        $display("Instrução 'sw $t2, 0($zero)': Escrevendo %d em Mem[0]", WriteData);
 
-        // Desativa escrita
-        MemWrite = 0;
-        #5;
+        // Operação 2: Desabilita a escrita após a operação `sw`
+        MemWrite = 0;              // Desabilita a escrita
+        #5;                        // Aguarda um ciclo de clock
 
-        // Lê da mesma posição de memória
-        Address = 32'd0;
-        #5;
+        // Operação 3: Simula a instrução `lw $t3, 0($zero)`
+        // Agora vamos ler da memória onde gravamos o valor 15 (simula lw)
+        Address = 32'd0;           // Endereço de memória de onde queremos ler (endereço 0)
+        #5;                        // Aguarda o ciclo de clock para efetuar a leitura
+        $display("Instrução 'lw $t3, 0($zero)': Lendo Mem[0] = %d", ReadData);
 
-        $display("Leitura da Mem[0] = %d", ReadData);
-
-        // Verifica se leitura foi correta
+        // Verifica se a leitura da memória foi realizada corretamente
         if (ReadData == 15)
-          $display(" Teste ok");
+            $display("Teste ok: Leitura correta de Mem[0].");
         else
-          $display(" Erro ");
+            $display("Erro: Leitura incorreta de Mem[0].");
 
+        // Finaliza a simulação
         $finish;
     end
 
