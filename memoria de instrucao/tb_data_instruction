@@ -1,28 +1,35 @@
-module instruction_memory ( //definindo entradas e saídas
-    input wire [31:0] A, 
-  output reg [31:0] RD
-);
-    //array para armazenar as instruções criando a memória
-    reg [31:0] mem [0:63];
-    
-    // Declaração da variável integer no escopo do módulo
-    integer i;
-    
-    //carregar as instruções 
-    initial begin
-        mem[0] = 32'h20010005;  // addi $1, $0, 5
-        mem[1] = 32'h2002000A;  // addi $2, $0, 10
-        mem[2] = 32'h00221820;  // add $3, $1, $2
-        mem[3] = 32'hAC030004;  // sw $3, 4($0)
-        mem[4] = 32'h8C040004;  // lw $4, 4($0)
+`timescale 1ns / 1ps
 
-        for (i = 5; i < 64; i = i + 1) begin
-            mem[i] = 32'h00000000;
-        end
-    end
-    
-    //lê a instrução
-    always @(*) begin
-      RD = mem[A[31:2]];
+module tb_Instruction_memory;
+    // Entradas
+    reg [31:0] addr;
+
+    // Saídas
+    wire [31:0] instr;
+
+    // Instancia o módulo a ser testado
+    Instruction_memory uut (
+        .addr(addr),
+        .instr(instr)
+    );
+
+    initial begin
+        // Exibe os resultados no console
+        $display("Tempo\tEndereço\tInstrução (hex)");
+        $monitor("%0dns\t%h\t%h", $time, addr, instr);
+
+        // Testa os primeiros endereços
+        addr = 32'd0;   #10;
+        addr = 32'd4;   #10;
+        addr = 32'd8;   #10;
+        addr = 32'd12;  #10;
+        addr = 32'd16;  #10;
+        addr = 32'd20;  #10;
+
+        // Testa endereço inválido (fora de 0-31 palavras)
+        addr = 32'd128; #10; // addr[6:2] = 32 => fora do range
+
+        // Fim da simulação
+        $finish;
     end
 endmodule
