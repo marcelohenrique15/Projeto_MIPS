@@ -33,7 +33,7 @@ module tb_data_memory();
         // Espera o clock estabilizar (primeiro ciclo de clock)
         #10;
 
-        // Operação 1: Simula a instrução `sw $t2, 0($zero)`
+        //Simula a instrução `sw $t2, 0($zero)`
         // O valor 15 será gravado no endereço 0 da memória.
         // Escrevendo 15 no endereço 0 (simula sw)
         WriteData = 32'd15;        // Dados a serem escritos (15 em decimal)
@@ -42,11 +42,11 @@ module tb_data_memory();
         #10;                       // Aguarda o próximo ciclo de clock para efetuar a escrita
         $display("Instrução 'sw $t2, 0($zero)': Escrevendo %d em Mem[0]", WriteData);
 
-        // Operação 2: Desabilita a escrita após a operação `sw`
+        //Desabilita a escrita após a operação `sw`
         MemWrite = 0;              // Desabilita a escrita
         #5;                        // Aguarda um ciclo de clock
 
-        // Operação 3: Simula a instrução `lw $t3, 0($zero)`
+        //Simula a instrução `lw $t3, 0($zero)`
         // Agora vamos ler da memória onde gravamos o valor 15 (simula lw)
         Address = 32'd0;           // Endereço de memória de onde queremos ler (endereço 0)
         #5;                        // Aguarda o ciclo de clock para efetuar a leitura
