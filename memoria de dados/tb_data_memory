@@ -1,56 +1,59 @@
-module data_memory_tb;
+`timescale 1ns / 1ps
 
-    // Entradas
+module tb_data_memory();
+
+    reg clk;
+    reg MemWrite;
     reg [31:0] Address;
     reg [31:0] WriteData;
-    reg MemWrite;
-    reg clk;
-
-    // Saída
     wire [31:0] ReadData;
 
-    // Instancia o módulo a ser testado
+    // Instancia o módulo sob teste
     data_memory uut (
+        .clk(clk),
+        .MemWrite(MemWrite),
         .Address(Address),
         .WriteData(WriteData),
-        .MemWrite(MemWrite),
-        .clk(clk),
         .ReadData(ReadData)
     );
 
-    // Gera o clock
+    // Geração do clock
     initial begin
         clk = 0;
-        forever #5 clk = ~clk;  // Clock com período de 10 unidades
+        forever #5 clk = ~clk;
     end
 
-    // Estímulos de teste
     initial begin
+        
         // Inicializa sinais
+        MemWrite = 0;
         Address = 0;
         WriteData = 0;
-        MemWrite = 0;
 
+        // Espera o clock estabilizar
         #10;
 
-        // Escreve 32'hDEADBEEF na posição 0
-        Address = 32'h00000000;
-        WriteData = 32'hDEADBEEF;
+        // Simula resultado de $t2 = $t0 + $t1 = 15
+        WriteData = 32'd15;
+        Address = 32'd0;
         MemWrite = 1;
-        #10;  // Espera 1 ciclo de clock
+        #10;  // Escreve na borda de subida
 
         // Desativa escrita
         MemWrite = 0;
-        #10;
-
-        // Lê o dado da mesma posição
-        Address = 32'h00000000;
         #5;
 
-        // Mostra o resultado da leitura
-        $display("Dado lido da memória: %h", ReadData);  // Deve mostrar DEADBEEF
+        // Lê da mesma posição de memória
+        Address = 32'd0;
+        #5;
 
-        #10;
+        $display("Leitura da Mem[0] = %d", ReadData);
+
+        // Verifica se leitura foi correta
+        if (ReadData == 15)
+          $display(" Teste ok");
+        else
+          $display(" Erro ");
 
         $finish;
     end
