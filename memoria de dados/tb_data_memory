@@ -1,102 +1,58 @@
-`timescale 1ns/1ps  // Unidade de tempo: 1ns, precisão: 1ps
+module data_memory_tb;
 
-// Módulo de teste para a memória de dados
-module tb_DataMemory();
-    // Sinais de entrada
+    // Entradas
+    reg [31:0] Address;
+    reg [31:0] WriteData;
+    reg MemWrite;
     reg clk;
-    reg [31:0] Endereco;
-    reg [31:0] DadosEscrita;
-    reg LeituraMem;
-    reg EscritaMem;
-    reg [1:0] ControleTamanho;
-    reg ExtensaoSinal;
-    
+
     // Saída
-    wire [31:0] DadosLeitura;
-    
-    // Instanciação da memória de dados
-    DataMemory dut (
+    wire [31:0] ReadData;
+
+    // Instancia o módulo a ser testado
+    data_memory uut (
+        .Address(Address),
+        .WriteData(WriteData),
+        .MemWrite(MemWrite),
         .clk(clk),
-        .Address(Endereco),
-        .WriteData(DadosEscrita),
-        .MemRead(LeituraMem),
-        .MemWrite(EscritaMem),
-        .SizeControl(ControleTamanho),
-        .SignExtend(ExtensaoSinal),
-        .ReadData(DadosLeitura)
+        .ReadData(ReadData)
     );
-    
-    // Geração de clock (período de 10ns)
-    always #5 clk = ~clk;
-    
+
+    // Gera o clock
     initial begin
-        // Inicialização dos sinais
         clk = 0;
-        Endereco = 0;
-        DadosEscrita = 0;
-        LeituraMem = 0;
-        EscritaMem = 0;
-        ControleTamanho = 0;
-        ExtensaoSinal = 0;
-        
-        // Configura arquivo para visualização de formas de onda
-        $dumpfile("onda.vcd");
-        $dumpvars(0, tb_DataMemory);
-        
-        $display("Início da simulação da memória de dados MIPS");
-        
-        // Teste 1: Leitura de palavra (LW)
+        forever #5 clk = ~clk;  // Clock com período de 10 unidades
+    end
+
+    // Estímulos de teste
+    initial begin
+        // Inicializa sinais
+        Address = 0;
+        WriteData = 0;
+        MemWrite = 0;
+
         #10;
-        LeituraMem = 1;
-        ControleTamanho = 2'b10;
-        Endereco = 32'h0;
+
+        // Escreve 32'hDEADBEEF na posição 0
+        Address = 32'h00000000;
+        WriteData = 32'hDEADBEEF;
+        MemWrite = 1;
+        #10;  // Espera 1 ciclo de clock
+
+        // Desativa escrita
+        MemWrite = 0;
         #10;
-        $display("Teste 1 - LW @0x%h: %h (esperado: 0x78563412)", Endereco, DadosLeitura);
-        
-        // Teste 2: Leitura de meia-palavra sem sinal (LHU)
+
+        // Lê o dado da mesma posição
+        Address = 32'h00000000;
+        #5;
+
+        // Mostra o resultado da leitura
+        $display("Dado lido da memória: %h", ReadData);  // Deve mostrar DEADBEEF
+
         #10;
-        ControleTamanho = 2'b01;
-        Endereco = 32'h4;
-        ExtensaoSinal = 0;
-        #10;
-        $display("Teste 2 - LHU @0x%h: %h (esperado: 0x0000A0FF)", Endereco, DadosLeitura);
-        
-        // Teste 3: Leitura de meia-palavra com sinal (LH)
-        #10;
-        ExtensaoSinal = 1;
-        #10;
-        $display("Teste 3 - LH @0x%h: %h (esperado: 0xFFFFA0FF)", Endereco, DadosLeitura);
-        
-        // Teste 4: Leitura de byte sem sinal (LBU)
-        #10;
-        ControleTamanho = 2'b00;
-        Endereco = 32'h6;
-        ExtensaoSinal = 0;
-        #10;
-        $display("Teste 4 - LBU @0x%h: %h (esperado: 0x00000055)", Endereco, DadosLeitura);
-        
-        // Teste 5: Escrita de palavra (SW)
-        #10;
-        LeituraMem = 0;
-        EscritaMem = 1;
-        ControleTamanho = 2'b10;
-        Endereco = 32'h10;
-        DadosEscrita = 32'h89ABCDEF;
-        #10;
-        EscritaMem = 0;
-        LeituraMem = 1;
-        #10;
-        $display("Teste 5 - LW @0x%h após SW: %h (esperado: 0x89ABCDEF)", Endereco, DadosLeitura);
-        
-        // Teste 6: Verificação de alinhamento (endereço inválido)
-        #10;
-        Endereco = 32'h1; // Endereço não alinhado
-        #10;
-        $display("Teste 6 - LW @0x%h (não alinhado): %h (esperado: 0x00000000)", Endereco, DadosLeitura);
-        
-        // Finalização
-        #20;
-        $display("Simulação concluída com sucesso");
+
         $finish;
     end
+
 endmodule
